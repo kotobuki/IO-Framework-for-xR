@@ -161,61 +161,61 @@ sequenceDiagram
 
 ### Analog channel
 
-| Analog value | Key |
-|:-------------|:----|
-| 0            | `   |
-| 1            | 1   |
-| 2            | 2   |
-| 3            | 3   |
-| 4            | 4   |
-| 5            | 5   |
-| 6            | 6   |
-| 7            | 7   |
-| 8            | 8   |
-| 9            | 9   |
-| 10           | 0   |
+| Analog value | Key     |
+| :----------- | :------ |
+| 0            | `` ` `` |
+| 1            | `1`     |
+| 2            | `2`     |
+| 3            | `3`     |
+| 4            | `4`     |
+| 5            | `5`     |
+| 6            | `6`     |
+| 7            | `7`     |
+| 8            | `8`     |
+| 9            | `9`     |
+| 10           | `0`     |
 
 ### Joystick channel
 
 | Joystick   | Key |
-|:-----------|:----|
-| Left-Up    | y   |
-| Up         | u   |
-| Right-Up   | i   |
-| Left       | h   |
-| Center     | j   |
-| Right      | k   |
-| Left-Down  | n   |
-| Down       | m   |
-| Right-Down | ,   |
+| :--------- | :-- |
+| Left-Up    | `y` |
+| Up         | `u` |
+| Right-Up   | `i` |
+| Left       | `h` |
+| Center     | `j` |
+| Right      | `k` |
+| Left-Down  | `n` |
+| Down       | `m` |
+| Right-Down | `,` |
 
 ### Buttons channel
 
 | No. | Name  | Key | Assigned input     |
-|:----|:------|:----|:-------------------|
-| 1   | Fire1 | v   | Dual Button - Red  |
-| 2   | Fire2 | b   | Dual Button - Blue |
-| 3   | Fire3 | f   | Touch Sensor - CH0 |
-| 4   | Jump  | g   | Touch Sensor - CH1 |
-| 5   |       | r   | Touch Sensor - CH2 |
-| 6   |       | t   | Touch Sensor - CH3 |
+| :-- | :---- | :-- | :----------------- |
+| 1   | Fire1 | `v` | Dual Button - Red  |
+| 2   | Fire2 | `b` | Dual Button - Blue |
+| 3   | Fire3 | `f` | Touch Sensor - CH0 |
+| 4   | Jump  | `g` | Touch Sensor - CH1 |
+| 5   |       | `r` | Touch Sensor - CH2 |
+| 6   |       | `t` | Touch Sensor - CH3 |
 
 ### Joystick and Buttons channel (for Gesture sensor only)
 
-| Joystick   | Key |
-|:-----------|:----|
-| Up         | u   |
-| Left       | h   |
-| Right      | k   |
-| Down       | m   |
+| Joystick | Key |
+| :------- | :-- |
+| Up       | `u` |
+| Left     | `h` |
+| Right    | `k` |
+| Down     | `m` |
 
 | No. | Name  | Key | Assigned input          |
-|:----|:------|:----|:------------------------|
-| 1   | Fire1 | v   | Gesture - Forward       |
-| 2   | Fire2 | b   | Gesture - Backward      |
-| 3   | Fire3 | f   | Gesture - Clockwise     |
-| 4   | Jump  | g   | Gesture - AntiClockwise |
-| 5   |       | r   | Gesture - Wave          |
+| :-- | :---- | :-- | :---------------------- |
+| 1   | Fire1 | `v` | Gesture - Forward       |
+| 2   | Fire2 | `b` | Gesture - Backward      |
+| 3   | Fire3 | `f` | Gesture - Clockwise     |
+| 4   | Jump  | `g` | Gesture - AntiClockwise |
+| 5   |       | `r` | Gesture - Wave          |
 
 ## Wi-Fi protocol
 
@@ -248,7 +248,7 @@ Example:
 
 `GET` `http://192.168.0.10/output?val=123`
 
-## IOFrameworkSDK for Unity
+## I/O Framework SDK for Unity
 
 The SDK consists of components as follows.
 
