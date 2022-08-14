@@ -1169,7 +1169,7 @@ void handleGestureSensor(bool updateRequested) {
       wasLastGestureNone = false;
       lastUpdate = now;
       sprintf(joystickStatus, "GESTURE: %-14s",
-              gestureSensor.gestureDescription(gesture));
+              gestureSensor.gestureDescription(gesture).c_str());
 
       xSemaphoreTake(mutex, portMAX_DELAY);
       sprintf((char *)joystickValueForReporting,
