@@ -14,7 +14,7 @@
 #include "MFRC522_I2C.h"
 #include "ServoEasing.hpp"
 
-const String VERSION_STRING = "v1.0.0-beta.3";
+const String VERSION_STRING = "v1.0.0-beta.4";
 
 // Note: the device name should be within 15 characters;
 // otherwise, macOS and iOS devices can't discover
