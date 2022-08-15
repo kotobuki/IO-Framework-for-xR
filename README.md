@@ -264,9 +264,10 @@ The SDK consists of components as follows.
 
 1. Import the `IOFrameworkSDK.unitypackage` file to your Unity project
 2. Instantiate an `IOFrameworkManager`
-3. Instantiate an `IOFrameworkTestUI` if necessary
-4. Instantiate a handler from handlers in the SDK (e.g., `IOFrameworkAnalogHandler`)
-5. Navigate PlayMaker editor to the FSM of the handler and edit
+3. Instantiate an `IOFrameworkTestUI` as a Child of the `IOFrameworkManager` object if necessary
+4. Instantiate a handler from handlers in the SDK (e.g., `IOFrameworkAnalogHandler`) as a Child of the `IOFrameworkManager` object
+5. Unpack the handler
+6. Navigate PlayMaker editor to the FSM of the handler and edit for your scene
 
 ### Input
 
