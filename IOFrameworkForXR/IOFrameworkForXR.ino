@@ -14,7 +14,7 @@
 #include "MFRC522_I2C.h"
 #include "ServoEasing.hpp"
 
-const String VERSION_STRING = "v1.0.0-beta.4";
+const String VERSION_STRING = "v1.0.0-beta.5";
 
 // Note: the device name should be within 15 characters;
 // otherwise, macOS and iOS devices can't discover
@@ -189,6 +189,10 @@ void handleNotFound() {
 }
 
 void setup() {
+  Serial.begin(115200);
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
+
   M5.begin();
   M5.Power.begin();
   Wire.begin();
@@ -257,6 +261,9 @@ void setup() {
   M5.Lcd.println("Starting up...");
   M5.Lcd.setCursor(0, LAYOUT_LINE_HEIGHT);
   M5.Lcd.println(VERSION_STRING);
+  M5.Lcd.setCursor(0, LAYOUT_LINE_HEIGHT * 2);
+  M5.Lcd.print("MAC: ");
+  M5.Lcd.println(WiFi.macAddress());
 
   preferences.begin(DEVICE_NAME.c_str(), false);
   unitOnPortB = preferences.getInt("unitOnPortB", UNIT_NONE);
