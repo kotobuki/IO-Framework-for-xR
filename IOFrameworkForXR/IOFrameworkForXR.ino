@@ -14,7 +14,7 @@
 #include "MFRC522_I2C.h"
 #include "ServoEasing.hpp"
 
-const String VERSION_STRING = "v1.0.0-beta.5";
+const String VERSION_STRING = "v1.0.0-beta.6";
 
 // Note: the device name should be within 15 characters;
 // otherwise, macOS and iOS devices can't discover
@@ -193,9 +193,11 @@ void setup() {
   Serial.print("MAC address: ");
   Serial.println(WiFi.macAddress());
 
-  M5.begin();
+  auto cfg = M5.config();
+  M5.begin(cfg);
   M5.Power.begin();
   Wire.begin();
+  M5.Display.init();
 
   for (int i = 0; i < NUM_BUTTONS; i++) {
     buttonValuesForReporting[i] = 0;
@@ -208,20 +210,21 @@ void setup() {
   pinMode(15, OUTPUT_OPEN_DRAIN);
 #endif
 
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextColor(GREEN, BLACK);
-  M5.Lcd.setTextSize(2);
-
   // https://docs.espressif.com/projects/arduino-esp32/en/latest/api/wifi.html#usestaticbuffers
   WiFi.useStaticBuffers(true);
 
   WiFi.mode(WIFI_STA);
 
-  M5.Lcd.drawLine(64, 220, 64, 239, GREEN);
-  M5.Lcd.drawLine(60, 235, 64, 239, GREEN);
-  M5.Lcd.drawLine(68, 235, 64, 239, GREEN);
-  M5.Lcd.setCursor(64, 200);
-  M5.Lcd.print("Press to setup Wi-Fi");
+  M5.Display.startWrite();
+  M5.Display.fillScreen(BLACK);
+  M5.Display.setTextColor(GREEN, BLACK);
+  M5.Display.setTextSize(2);
+  M5.Display.drawLine(64, 220, 64, 239, GREEN);
+  M5.Display.drawLine(60, 235, 64, 239, GREEN);
+  M5.Display.drawLine(68, 235, 64, 239, GREEN);
+  M5.Display.setCursor(64, 200);
+  M5.Display.print("Press to setup Wi-Fi");
+  M5.Display.endWrite();
 
   int numOfRetriesRemaining = 3;
   while (0 < numOfRetriesRemaining) {
@@ -230,23 +233,31 @@ void setup() {
       break;
     }
 
-    M5.Lcd.setCursor(64, 180);
-    M5.Lcd.print(numOfRetriesRemaining);
+    M5.Display.startWrite();
+    M5.Display.setCursor(64, 180);
+    M5.Display.print(numOfRetriesRemaining);
+    M5.Display.endWrite();
     numOfRetriesRemaining--;
     delay(1000);
   }
 
-  M5.Lcd.clear();
+  M5.Display.startWrite();
+  M5.Display.clear();
+  M5.Display.endWrite();
 
   if (M5.BtnA.isPressed()) {
     WiFi.beginSmartConfig();
 
-    M5.Lcd.setCursor(0, 0);
-    M5.Lcd.print("Waiting for SmartConfig");
+    M5.Display.startWrite();
+    M5.Display.setCursor(0, 0);
+    M5.Display.print("Waiting for SmartConfig");
+    M5.Display.endWrite();
 
     while (!WiFi.smartConfigDone()) {
       delay(500);
-      M5.Lcd.print(".");
+      M5.Display.startWrite();
+      M5.Display.print(".");
+      M5.Display.endWrite();
 
       if (60000 < millis()) {
         ESP.restart();
@@ -256,14 +267,16 @@ void setup() {
     WiFi.begin();
   }
 
-  M5.Lcd.clear();
-  M5.Lcd.setCursor(0, 0);
-  M5.Lcd.println("Starting up...");
-  M5.Lcd.setCursor(0, LAYOUT_LINE_HEIGHT);
-  M5.Lcd.println(VERSION_STRING);
-  M5.Lcd.setCursor(0, LAYOUT_LINE_HEIGHT * 2);
-  M5.Lcd.print("MAC: ");
-  M5.Lcd.println(WiFi.macAddress());
+  M5.Display.startWrite();
+  M5.Display.clear();
+  M5.Display.setCursor(0, 0);
+  M5.Display.println("Starting up...");
+  M5.Display.setCursor(0, LAYOUT_LINE_HEIGHT);
+  M5.Display.println(VERSION_STRING);
+  M5.Display.setCursor(0, LAYOUT_LINE_HEIGHT * 2);
+  M5.Display.print("MAC: ");
+  M5.Display.println(WiFi.macAddress());
+  M5.Display.endWrite();
 
   preferences.begin(DEVICE_NAME.c_str(), false);
   unitOnPortB = preferences.getInt("unitOnPortB", UNIT_NONE);
@@ -350,8 +363,10 @@ void setup() {
                             CONFIG_ARDUINO_UDP_TASK_PRIORITY, NULL, 0);
   }
 
-  M5.Lcd.clear();
+  M5.Display.startWrite();
+  M5.Display.clear();
   drawButtons(currentScreenMode);
+  M5.Display.endWrite();
 }
 
 void loop() {
@@ -359,7 +374,9 @@ void loop() {
   unsigned long start = millis();
 
   M5.update();
+  M5.Display.startWrite();
   handleButtons();
+  M5.Display.endWrite();
 
   isBluetoothConnected = bleKeyboard.isConnected();
   bool requestToSend = isBluetoothConnected && isSendingKeyboardEvents;
@@ -393,21 +410,25 @@ void loop() {
     handleAnalogInput(requestToSend);
   }
 
+  M5.Display.startWrite();
   if (currentScreenMode == SCREEN_MAIN) {
     drawMainScreen();
+  } else {
+    drawPreferencesScreen();
   }
 
   unsigned long now = millis();
   unsigned long elapsed = now - start;
 
   if (currentScreenMode == SCREEN_MAIN) {
-    M5.Lcd.setTextSize(1);
-    M5.Lcd.setCursor(0, 200);
-    M5.Lcd.printf("SDK: %s | ", ESP.getSdkVersion());
-    M5.Lcd.printf("Loop: %3d ms | ", elapsed);
-    M5.Lcd.printf("Bat: %3d %%", M5.Power.getBatteryLevel());
-    M5.Lcd.setTextSize(2);
+    M5.Display.setTextSize(1);
+    M5.Display.setCursor(0, 200);
+    M5.Display.printf("SDK: %s | ", ESP.getSdkVersion());
+    M5.Display.printf("Loop: %3d ms | ", elapsed);
+    M5.Display.printf("Bat: %3d %%", M5.Power.getBatteryLevel());
+    M5.Display.setTextSize(2);
   }
+  M5.Display.endWrite();
 
   if (elapsed < LOOP_INTERVAL) {
     delay(LOOP_INTERVAL - elapsed);
@@ -427,20 +448,20 @@ void serverLoop(void *parameters) {
 
 void handleButtons() {
   if (currentScreenMode != SCREEN_MAIN) {
-    M5.Lcd.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
-    M5.Lcd.print(">");
+    M5.Display.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
+    M5.Display.print(">");
   }
 
   if (M5.BtnA.wasPressed()) {
     switch (currentScreenMode) {
       case SCREEN_MAIN:
         currentScreenMode = SCREEN_PREFS_SELECT;
-        M5.Lcd.clear(TFT_BLACK);
+        M5.Display.clear(TFT_BLACK);
         drawButtons(currentScreenMode);
         break;
       case SCREEN_PREFS_SELECT:
         currentScreenMode = SCREEN_MAIN;
-        M5.Lcd.clear(TFT_BLACK);
+        M5.Display.clear(TFT_BLACK);
         drawButtons(currentScreenMode);
         break;
       case SCREEN_PREFS_EDIT:
@@ -500,11 +521,11 @@ void handleButtons() {
         }
         break;
       case SCREEN_PREFS_SELECT:
-        M5.Lcd.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
-        M5.Lcd.print(" ");
+        M5.Display.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
+        M5.Display.print(" ");
         currentMenuItem = (currentMenuItem + 1) % PREFS_MENU_NUM_ITEMS;
-        M5.Lcd.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
-        M5.Lcd.print(">");
+        M5.Display.setCursor(0, 0 + LAYOUT_LINE_HEIGHT * currentMenuItem);
+        M5.Display.print(">");
         drawButtons(currentScreenMode);
         break;
       case SCREEN_PREFS_RFID:
@@ -635,10 +656,6 @@ void handleButtons() {
 
     drawButtons(currentScreenMode);
   }
-
-  if (currentScreenMode != SCREEN_MAIN) {
-    drawPreferencesScreen();
-  }
 }
 
 void attachVibrator() {
@@ -702,74 +719,74 @@ void updateFlagsRegardingPortB() {
 
 void drawMainScreen() {
   if (WiFi.status() == WL_CONNECTED) {
-    M5.Lcd.setCursor(0, 0);
-    M5.Lcd.printf("B: %s | W: %s", isBluetoothConnected ? "<->" : "-X-",
-                  WiFi.localIP().toString().c_str());
+    M5.Display.setCursor(0, 0);
+    M5.Display.printf("B: %s | W: %s", isBluetoothConnected ? "<->" : "-X-",
+                      WiFi.localIP().toString().c_str());
   } else {
-    M5.Lcd.setCursor(0, 0);
-    M5.Lcd.printf("Bluetooth: %s",
-                  isBluetoothConnected ? "Connected   " : "Disconnected");
+    M5.Display.setCursor(0, 0);
+    M5.Display.printf("Bluetooth: %s",
+                      isBluetoothConnected ? "Connected   " : "Disconnected");
   }
 
-  M5.Lcd.setCursor(0, LAYOUT_ANALOG_CH_TOP);
-  M5.Lcd.print(analogStatus);
+  M5.Display.setCursor(0, LAYOUT_ANALOG_CH_TOP);
+  M5.Display.print(analogStatus);
 
-  M5.Lcd.setCursor(0, LAYOUT_JOYSTICK_CH_TOP);
-  M5.Lcd.print(joystickStatus);
+  M5.Display.setCursor(0, LAYOUT_JOYSTICK_CH_TOP);
+  M5.Display.print(joystickStatus);
 
-  M5.Lcd.setCursor(0, LAYOUT_BUTTONS_CH_TOP);
+  M5.Display.setCursor(0, LAYOUT_BUTTONS_CH_TOP);
   if (isDualButtonConnected || isTouchSensorConnected ||
       isRfidReaderConnected) {
-    M5.Lcd.print("BUTTONS:");
+    M5.Display.print("BUTTONS:");
   }
 
   if (isDualButtonConnected) {
-    M5.Lcd.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT);
-    M5.Lcd.print(buttonsStatus1);
-    M5.Lcd.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT * 2);
-    M5.Lcd.print(buttonsStatus2);
+    M5.Display.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT);
+    M5.Display.print(buttonsStatus1);
+    M5.Display.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT * 2);
+    M5.Display.print(buttonsStatus2);
   } else {
-    M5.Lcd.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT);
-    M5.Lcd.print(buttonsStatus2);
+    M5.Display.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT);
+    M5.Display.print(buttonsStatus2);
   }
 }
 
 void drawPreferencesScreen() {
-  M5.Lcd.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 0);
+  M5.Display.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 0);
   switch (unitOnPortB) {
     case UNIT_NONE:
-      M5.Lcd.print("Port B: NONE       ");
+      M5.Display.print("Port B: NONE       ");
       break;
     case UNIT_DUAL_BUTTON:
-      M5.Lcd.print("Port B: DUAL BUTTON");
+      M5.Display.print("Port B: DUAL BUTTON");
       break;
     case UNIT_ANALOG_IN:
-      M5.Lcd.print("Port B: ANALOG IN  ");
+      M5.Display.print("Port B: ANALOG IN  ");
       break;
     case UNIT_SERVO:
-      M5.Lcd.print("Port B: SERVO      ");
+      M5.Display.print("Port B: SERVO      ");
       break;
     case UNIT_VIBRATOR:
-      M5.Lcd.print("Port B: VIBRATOR   ");
+      M5.Display.print("Port B: VIBRATOR   ");
       break;
     default:
       break;
   }
 
-  M5.Lcd.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 1);
-  M5.Lcd.printf("eCO2 Range Min: %5d", eCO2RangeMin);
-  M5.Lcd.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 2);
-  M5.Lcd.printf("           Max: %5d", eCO2RangeMax);
+  M5.Display.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 1);
+  M5.Display.printf("eCO2 Range Min: %5d", eCO2RangeMin);
+  M5.Display.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 2);
+  M5.Display.printf("           Max: %5d", eCO2RangeMax);
 
-  M5.Lcd.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 3);
-  M5.Lcd.printf("Dist Range Min: %5d", distRangeMin);
-  M5.Lcd.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 4);
-  M5.Lcd.printf("           Max: %5d", distRangeMax);
+  M5.Display.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 3);
+  M5.Display.printf("Dist Range Min: %5d", distRangeMin);
+  M5.Display.setCursor(20, 0 + LAYOUT_LINE_HEIGHT * 4);
+  M5.Display.printf("           Max: %5d", distRangeMax);
 
   for (int i = 0; i < 4; i++) {
-    M5.Lcd.setCursor(20,
-                     0 + LAYOUT_LINE_HEIGHT * (PREFS_MENU_INDEX_RFID_1 + i));
-    M5.Lcd.printf("RFID %d: %s", i + 1, rfidTagUid[i].c_str());
+    M5.Display.setCursor(
+        20, 0 + LAYOUT_LINE_HEIGHT * (PREFS_MENU_INDEX_RFID_1 + i));
+    M5.Display.printf("RFID %d: %s", i + 1, rfidTagUid[i].c_str());
   }
 
   if (!isRfidReaderConnected) {
@@ -1247,16 +1264,16 @@ void drawButton(int centerX, const String &title) {
   const int BUTTON_WIDTH = 72;
   const int BUTTON_HEIGHT = 24;
 
-  M5.Lcd.setTextSize(2);
+  M5.Display.setTextSize(2);
 
-  int fontHeight = M5.Lcd.fontHeight();
+  int fontHeight = M5.Display.fontHeight();
   int rectLeft = centerX - BUTTON_WIDTH / 2;
-  int rectTop = M5.Lcd.height() - BUTTON_HEIGHT;
+  int rectTop = M5.Display.height() - BUTTON_HEIGHT;
   int rectWidth = BUTTON_WIDTH;
   int rectHeight = BUTTON_HEIGHT;
   int coordinateY = rectTop + (rectHeight - fontHeight) / 2;
 
-  M5.Lcd.fillRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_BLACK);
-  M5.Lcd.drawRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_GREEN);
-  M5.Lcd.drawCentreString(title, centerX, coordinateY, 1);
+  M5.Display.fillRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_BLACK);
+  M5.Display.drawRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_GREEN);
+  M5.Display.drawCentreString(title, centerX, coordinateY, 1);
 }
