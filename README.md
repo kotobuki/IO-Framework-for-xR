@@ -95,11 +95,13 @@ The connected Unit(s) input is transmitted on three different channels: analog, 
 
 1. Install EspTouch for [iOS](https://apps.apple.com/app/espressif-esptouch/id1071176700) or [Android](https://github.com/EspressifApp/EsptouchForAndroid/releases/tag/v2.0.0/esptouch-v2.0.0.apk) (choose the `esptouch-v2.0.0.apk`) to your smartphone
 2. Connect your smartphone to the Wi-Fi router
-3. Open your EspTouch app
+3. Open your EspTouch app and tap on the EspTouch item (not EspTouch V2)
 4. Input the router’s password on the EspTouch app
-5. Power on (or reboot) your M5Stack and press the A button within three seconds
+5. Power on (or reboot) your M5Stack and press the `A` button within three seconds[^MAC]
 6. Tap the `Confirm` button on the EspTouch app and wait for a while
 7. You will see an IP address on the screen of the M5Stack
+
+[^MAC]: If you need to submit the MAC address to the administrator to connect to the network, please take a picture of the string on the startup screen below the version number and read it.
 
 ### Test
 
@@ -108,9 +110,9 @@ The connected Unit(s) input is transmitted on three different channels: analog, 
 3. If you want to use a Unit to be connected to Port B, please refer to the "How to setup" section and setup (Units to be connected to Port A will be recognized automatically)
 4. Connect the controller as a Bluetooth device to your device (please follow standard instruction for the device)
 5. Open the [IOFrameworkWidget (BLE and Wi-Fi)](https://gallery.styly.cc/scene/dd6b5c48-bb91-46e6-ab01-0f964d96de24) scene in a browser and bring the browser frontmost
-6. Press the `Send` (C) button to start sending
+6. Press the `Send` (`C`) button to start sending
 7. Control the joystick, sensor, etc.
-8. Once confirmed, press the `Stop` (C) button again to stop sending
+8. Once confirmed, press the `Stop` (`C`) button again to stop sending
 
 [![STYLY_marker](images/STYLY_marker.png)](https://gallery.styly.cc/scene/dd6b5c48-bb91-46e6-ab01-0f964d96de24)
 
@@ -118,30 +120,115 @@ The connected Unit(s) input is transmitted on three different channels: analog, 
 
 #### PORT B
 
-1. Press the `Setup` (A) button to enter the preferences screen
-2. Press the `Next` (C) button (if needed) to choose the `PORT B: NONE` line
-3. Press the `Go` (B) button
-4. Press the `-` (A) or `+` (C) button to be matched to the device connected to the Port B (i.e., `DUAL BUTTON`, `ANALOG IN`[^ANALOG_IN], `SERVO` or `VIBRATOR`)
-5. Press the `Done` (B) button
-6. Press the `Exit` (A) button to back to the main screen
+1. Press the `Setup` (`A`) button to enter the preferences screen
+2. Press the `Next` (`C`) button (if needed) to choose the `PORT B: NONE` line
+3. Press the `Go` (`B`) button
+4. Press the `-` (`A`) or `+` (`C`) button to be matched to the device connected to the Port B (i.e., `DUAL BUTTON`, `ANALOG IN`[^ANALOG_IN], `SERVO` or `VIBRATOR`)
+5. Press the `Done` (`B`) button
+6. Press the `Exit` (`A`) button to back to the main screen
 
 [^ANALOG_IN]: If you want to connect Units to be connected to Port B and use `A.OUT` such as LIGHT, ANGLE etc., please choose this option.
 
 #### RFID Tags
 
-1. Press the `Setup` (A) button to enter the preferences screen
-2. Press the `Next` (C) button (if needed) to choose the `RFID 1: **:**:**:**` line
-3. Press the `Go` (B) button
-4. Press the `Reset` (C) button
+1. Press the `Setup` (`A`) button to enter the preferences screen
+2. Press the `Next` (`C`) button (if needed) to choose the `RFID 1: **:**:**:**` line
+3. Press the `Go` (`B`) button
+4. Press the `Reset` (`C`) button
 5. Put an RFID Tag on the RFID Unit, then remove the Tag
-6. Press the `Next` (C) button to choose the next line
+6. Press the `Next` (`C`) button to choose the next line
 7. Repeat from step 3 for 3 times to register the remaining 3 RFID Tags
-8. Press the `Exit` (A) button to back to the main screen
+8. Press the `Exit` (`A`) button to back to the main screen
 
 ### Troubleshooting
 
 - "IO Framework M5" is shown as connected but no input to the STYLY scene. → Please try to unpair the controller in the Bluetooth preference and pair it again.
 - Bluetooth connection status on my controller keeps switching between `Connected` and `Disconnected` when not connected. → The controller might have been paired with an old host (i.e., a PC or smartphone). If you no longer use the controller with the host, please remove the device from the host.
+
+## I/O Framework SDK for Unity
+
+The SDK consists of components as follows.
+
+- `IOFrameworkManager` is a manager for the I/O Framework
+- `IOFrameworkTestUI` is a UI to test the framework
+- `IOFrameworkAnalogHandler` is a handler for events in the analog channel
+- `IOFrameworkJoystickHandler` is a handler for events in the joystick channel
+- `IOFrameworkButtonsHandler` is a handler for events in the buttons channel
+- `IOFrameworkGestureHandler` is a handler for events from a Gesture sensor (in both joystick and buttons channel)
+- `IOFrameworkOutputHandler` is a handler for events in the output channel via Wi-Fi
+
+![IOFrameworkTestUI](images/IOFrameworkTestUI.png)
+IOFrameworkTestUI
+
+![IOFrameworkAnalogHandler](images/IOFrameworkAnalogHandler.png)
+IOFrameworkAnalogHandler
+
+![IOFrameworkJoystickHandler](images/IOFrameworkJoystickHandler.png)
+IOFrameworkJoystickHandler
+
+![IOFrameworkButtonsHandler](images/IOFrameworkButtonsHandler.png)
+IOFrameworkButtonsHandler
+
+![IOFrameworkGestureHandler](images/IOFrameworkGestureHandler.png)
+IOFrameworkGestureHandler
+
+![IOFrameworkOutputHandler](images/IOFrameworkOutputHandler.png)
+IOFrameworkOutputHandler
+
+### Dependencies
+
+- [ ] [PlayMaker](https://hutonggames.com/)
+- [ ] [STYLY Plugin for Unity](https://styly.cc/download/)
+
+### Usage
+
+1. Import the `IOFrameworkSDK.unitypackage` file to your Unity project
+2. Instantiate an `IOFrameworkManager`
+3. Instantiate an `IOFrameworkTestUI` as a Child of the `IOFrameworkManager` object if necessary
+4. Instantiate a handler from handlers in the SDK (e.g., `IOFrameworkAnalogHandler`) as a Child of the `IOFrameworkManager` object
+5. Unpack the handler
+6. Navigate PlayMaker editor to the FSM of the handler and edit for your scene
+
+### Input
+
+IOFrameworkManager broadcasts events to all Children of the IOFrameworkManager.
+
+- `ANALOG VALUE CHANGED` Int: analog value
+- `JOYSTICK VALUE CHANGED` String: joystick value
+- `BUTTON 1 DOWN`
+- `BUTTON 1 UP`
+- `BUTTON 2 DOWN`
+- `BUTTON 2 UP`
+- `BUTTON 3 DOWN`
+- `BUTTON 3 UP`
+- `BUTTON 4 DOWN`
+- `BUTTON 4 UP`
+- `BUTTON 5 DOWN`
+- `BUTTON 5 UP`
+- `BUTTON 6 DOWN`
+- `BUTTON 6 UP`
+
+### Output
+
+Send events to `IOFrameworkManager: Event Handlers FSM`.
+
+- `SET OUTPUT VALUE REQUEST` String: output value
+
+### Wi-Fi
+
+IOFrameworkManager broadcasts events to all FSMs.
+
+- `HTTP RESPONSE` String: HTTP response
+
+Send events to `IOFrameworkManager: Event Handlers FSM`.
+
+- `SET IP ADDRESS` String: IP address
+
+Send events to `IOFrameworkManager: HTTP Request Loop FSM`.
+
+- `START LISTENING`
+- `STOP LISTENING`
+- `LISTEN ONCE`
 
 ## Bluetooth keyboard protocol
 
@@ -248,69 +335,7 @@ Example:
 
 `GET` `http://192.168.0.10/output?val=123`
 
-## I/O Framework SDK for Unity
-
-The SDK consists of components as follows.
-
-- `IOFrameworkManager` is a manager for the I/O Framework
-- `IOFrameworkTestUI` is a UI to test the framework
-- `IOFrameworkAnalogHandler` is a handler for events in the analog channel
-- `IOFrameworkJoystickHandler` is a handler for events in the joystick channel
-- `IOFrameworkButtonsHandler` is a handler for events in the buttons channel
-- `IOFrameworkGestureHandler` is a handler for events from a Gesture sensor (in both joystick and buttons channel)
-- `IOFrameworkOutputHandler` is a handler for events in the output channel via Wi-Fi
-
-### Usage
-
-1. Import the `IOFrameworkSDK.unitypackage` file to your Unity project
-2. Instantiate an `IOFrameworkManager`
-3. Instantiate an `IOFrameworkTestUI` as a Child of the `IOFrameworkManager` object if necessary
-4. Instantiate a handler from handlers in the SDK (e.g., `IOFrameworkAnalogHandler`) as a Child of the `IOFrameworkManager` object
-5. Unpack the handler
-6. Navigate PlayMaker editor to the FSM of the handler and edit for your scene
-
-### Input
-
-IOFrameworkManager broadcasts events to all FSMs.
-
-- `ANALOG VALUE CHANGED` Int: analog value
-- `JOYSTICK VALUE CHANGED` String: joystick value
-- `BUTTON 1 DOWN`
-- `BUTTON 1 UP`
-- `BUTTON 2 DOWN`
-- `BUTTON 2 UP`
-- `BUTTON 3 DOWN`
-- `BUTTON 3 UP`
-- `BUTTON 4 DOWN`
-- `BUTTON 4 UP`
-- `BUTTON 5 DOWN`
-- `BUTTON 5 UP`
-- `BUTTON 6 DOWN`
-- `BUTTON 6 UP`
-
-### Output
-
-Send events to `IOFrameworkManager: Event Handlers FSM`.
-
-- `SET OUTPUT VALUE REQUEST` String: output value
-
-### Wi-Fi
-
-IOFrameworkManager broadcasts events to all FSMs.
-
-- `HTTP RESPONSE` String: HTTP response
-
-Send events to `IOFrameworkManager: Event Handlers FSM`.
-
-- `SET IP ADDRESS` String: IP address
-
-Send events to `IOFrameworkManager: HTTP Request Loop FSM`.
-
-- `START LISTENING`
-- `STOP LISTENING`
-- `LISTEN ONCE`
-
-## Requirements (for developers)
+## For firmware developers
 
 ### Preparing the development environment
 
