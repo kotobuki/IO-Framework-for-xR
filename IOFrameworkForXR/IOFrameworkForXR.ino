@@ -682,6 +682,7 @@ void updateFlagsRegardingPortB() {
       detachVibrator();
       isDualButtonConnected = false;
       isAnalogSensorConnected = false;
+      sprintf(analogStatus, "                    ");
       isServoConnected = false;
       isVibratorConnected = false;
       break;
@@ -692,6 +693,7 @@ void updateFlagsRegardingPortB() {
       pinMode(PIN_PORT_B_B, INPUT);
       isDualButtonConnected = true;
       isAnalogSensorConnected = false;
+      sprintf(analogStatus, "                    ");
       isServoConnected = false;
       isVibratorConnected = false;
       break;
@@ -711,6 +713,7 @@ void updateFlagsRegardingPortB() {
       servo.setEasingType(EASE_CUBIC_IN_OUT);
       isDualButtonConnected = false;
       isAnalogSensorConnected = false;
+      sprintf(analogStatus, "                    ");
       isServoConnected = true;
       isVibratorConnected = false;
       break;
@@ -719,6 +722,7 @@ void updateFlagsRegardingPortB() {
       attachVibrator();
       isDualButtonConnected = false;
       isAnalogSensorConnected = false;
+      sprintf(analogStatus, "                    ");
       isServoConnected = false;
       isVibratorConnected = true;
       break;
