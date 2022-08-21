@@ -14,7 +14,7 @@
 #include "MFRC522_I2C.h"
 #include "ServoEasing.hpp"
 
-const String VERSION_STRING = "v1.0.0-beta.6";
+const String VERSION_STRING = "v1.0.0-beta.7";
 
 // Note: the device name should be within 15 characters;
 // otherwise, macOS and iOS devices can't discover
@@ -115,6 +115,7 @@ const int NUM_BUTTONS = 6;
 BleKeyboard bleKeyboard(DEVICE_NAME.c_str());
 bool isBluetoothConnected = false;
 bool isSendingKeyboardEvents = false;
+bool sentKeyboardEvent = false;
 
 // Web server related variables
 WebServer server(80);
@@ -122,6 +123,7 @@ WebServer server(80);
 volatile int analogValueForReporting = 0;
 volatile char joystickValueForReporting[32];
 volatile int buttonValuesForReporting[NUM_BUTTONS];
+volatile bool receivedHttpRequest = false;
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 
@@ -129,16 +131,21 @@ void handleInputRequest() {
   static char message[100];
 
   xSemaphoreTake(mutex, portMAX_DELAY);
+  receivedHttpRequest = true;
   sprintf(message, "%d,%s,%d,%d,%d,%d,%d,%d", analogValueForReporting,
           joystickValueForReporting, buttonValuesForReporting[0],
           buttonValuesForReporting[1], buttonValuesForReporting[2],
           buttonValuesForReporting[3], buttonValuesForReporting[4],
           buttonValuesForReporting[5]);
-  server.send(200, "text/csv", message);
   xSemaphoreGive(mutex);
+  server.send(200, "text/csv", message);
 }
 
 void handleOutputRequest() {
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  receivedHttpRequest = true;
+  xSemaphoreGive(mutex);
+
   if (server.args() == 1 && server.argName(0).equals("val")) {
     int val = server.arg(0).toInt();
 
@@ -174,7 +181,11 @@ void handleOutputRequest() {
 }
 
 void handleNotFound() {
-  String message = "File Not Found\n\n";
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  receivedHttpRequest = true;
+  xSemaphoreGive(mutex);
+
+  String message = "API Not Found\n\n";
   message += "URI: ";
   message += server.uri();
   message += "\nMethod: ";
@@ -353,7 +364,6 @@ void setup() {
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    server.on("/", []() { server.send(200, "text/plain", "Hello from RE:"); });
     server.on("/input", handleInputRequest);
     server.on("/output", handleOutputRequest);
     server.onNotFound(handleNotFound);
@@ -749,6 +759,26 @@ void drawMainScreen() {
     M5.Display.setCursor(0, LAYOUT_BUTTONS_CH_TOP + LAYOUT_LINE_HEIGHT);
     M5.Display.print(buttonsStatus2);
   }
+
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  if (receivedHttpRequest) {
+    M5.Display.setColor(TFT_GREEN);
+    M5.Display.fillRect(306, 0, 14, 14);
+    receivedHttpRequest = false;
+  } else {
+    M5.Display.setColor(TFT_BLACK);
+    M5.Display.fillRect(306, 0, 14, 14);
+  }
+  xSemaphoreGive(mutex);
+
+  if (sentKeyboardEvent) {
+    M5.Display.setColor(TFT_GREEN);
+    M5.Display.fillRect(306, 221, 14, 14);
+    sentKeyboardEvent = false;
+  } else {
+    M5.Display.setColor(TFT_BLACK);
+    M5.Display.fillRect(306, 221, 14, 14);
+  }
 }
 
 void drawPreferencesScreen() {
@@ -837,14 +867,18 @@ void handleDualButton(bool updateRequested) {
   if (updateRequested) {
     if (!wasRedButtonPressed && isRedButtonPressed) {
       bleKeyboard.press(KEYS_FOR_BUTTON_CH[KEY_ID_RED_BUTTON]);
+      sentKeyboardEvent = true;
     } else if (wasRedButtonPressed && !isRedButtonPressed) {
       bleKeyboard.release(KEYS_FOR_BUTTON_CH[KEY_ID_RED_BUTTON]);
+      sentKeyboardEvent = true;
     }
 
     if (!wasBlueButtonPressed && isBlueButtonPressed) {
       bleKeyboard.press(KEYS_FOR_BUTTON_CH[KEY_ID_BLUE_BUTTON]);
+      sentKeyboardEvent = true;
     } else if (wasBlueButtonPressed && !isBlueButtonPressed) {
       bleKeyboard.release(KEYS_FOR_BUTTON_CH[KEY_ID_BLUE_BUTTON]);
+      sentKeyboardEvent = true;
     }
   }
 
@@ -869,6 +903,7 @@ void handleAnalogInput(bool updateRequested) {
 
     if (updateRequested) {
       bleKeyboard.write(KEYS_FOR_ANALOG_CH[currentAnalogValue]);
+      sentKeyboardEvent = true;
     }
     lastAnalogValue = currentAnalogValue;
   }
@@ -932,6 +967,7 @@ void handleJoystick(bool updateRequested) {
       } else if (curJoystickX == 1 && curJoystickY == -1) {
         bleKeyboard.write(KEY_JOYSTICK_RIGHT_DOWN);
       }
+      sentKeyboardEvent = true;
     }
 
     lastJoystickX = curJoystickX;
@@ -981,6 +1017,7 @@ void handleRangingSensor(bool updateRequested) {
   if (lastValue != currentValue) {
     if (updateRequested) {
       bleKeyboard.write(KEYS_FOR_ANALOG_CH[currentValue]);
+      sentKeyboardEvent = true;
     }
     lastValue = currentValue;
   }
@@ -1006,6 +1043,7 @@ void handleGasSensor(bool updateRequested) {
   if (lastValue != currentValue) {
     if (updateRequested) {
       bleKeyboard.write(KEYS_FOR_ANALOG_CH[currentValue]);
+      sentKeyboardEvent = true;
     }
     lastValue = currentValue;
   }
@@ -1042,6 +1080,7 @@ void handleRFID(bool updateRequested) {
       if (rfidTagUid[i] == curRfidTagUid) {
         if (updateRequested) {
           bleKeyboard.press(KEYS_FOR_BUTTON_CH[i + OFFSET_BUTTON_3]);
+          sentKeyboardEvent = true;
         }
         sprintf(buttonsStatus2, "RFID Tag:%d   ", i);
         lastRfidTag = i;
@@ -1068,6 +1107,7 @@ void handleRFID(bool updateRequested) {
     if (consecutiveCountsOfNotSeeTag > 2) {
       if (updateRequested) {
         bleKeyboard.release(KEYS_FOR_BUTTON_CH[lastRfidTag + OFFSET_BUTTON_3]);
+        sentKeyboardEvent = true;
       }
       if (currentScreenMode == SCREEN_MAIN) {
         sprintf(buttonsStatus2, "RFID Tag:None");
@@ -1124,8 +1164,10 @@ void handleTouchSensor(bool updateRequested) {
     if (updateRequested) {
       if (!wasPadTouched && isPadTouched) {
         bleKeyboard.press(KEYS_FOR_BUTTON_CH[i + OFFSET_BUTTON_3]);
+        sentKeyboardEvent = true;
       } else if (wasPadTouched && !isPadTouched) {
         bleKeyboard.release(KEYS_FOR_BUTTON_CH[i + OFFSET_BUTTON_3]);
+        sentKeyboardEvent = true;
       }
     }
 
@@ -1159,30 +1201,39 @@ void handleGestureSensor(bool updateRequested) {
         switch (gesture) {
           case gestureSensor.eGestureRight:
             bleKeyboard.write(KEY_JOYSTICK_RIGHT);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureLeft:
             bleKeyboard.write(KEY_JOYSTICK_LEFT);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureUp:
             bleKeyboard.write(KEY_JOYSTICK_CENTER_UP);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureDown:
             bleKeyboard.write(KEY_JOYSTICK_CENTER_DOWN);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureForward:
             bleKeyboard.press(KEYS_FOR_BUTTON_CH[0]);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureBackward:
             bleKeyboard.press(KEYS_FOR_BUTTON_CH[1]);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureClockwise:
             bleKeyboard.press(KEYS_FOR_BUTTON_CH[2]);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureAntiClockwise:
             bleKeyboard.press(KEYS_FOR_BUTTON_CH[3]);
+            sentKeyboardEvent = true;
             break;
           case gestureSensor.eGestureWave:
             bleKeyboard.press(KEYS_FOR_BUTTON_CH[4]);
+            sentKeyboardEvent = true;
             break;
 
           default:
@@ -1212,6 +1263,7 @@ void handleGestureSensor(bool updateRequested) {
           bleKeyboard.release(KEYS_FOR_BUTTON_CH[2]);
           bleKeyboard.release(KEYS_FOR_BUTTON_CH[3]);
           bleKeyboard.release(KEYS_FOR_BUTTON_CH[4]);
+          sentKeyboardEvent = true;
         }
         wasLastGestureNone = true;
 
