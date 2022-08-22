@@ -281,12 +281,13 @@ void setup() {
   M5.Display.startWrite();
   M5.Display.clear();
   M5.Display.setCursor(0, 0);
-  M5.Display.println("Starting up...");
+  M5.Display.print("Starting up...");
   M5.Display.setCursor(0, LAYOUT_LINE_HEIGHT);
-  M5.Display.println(VERSION_STRING);
+  M5.Display.print(VERSION_STRING);
   M5.Display.setCursor(0, LAYOUT_LINE_HEIGHT * 2);
-  M5.Display.print("MAC: ");
-  M5.Display.println(WiFi.macAddress());
+  M5.Display.printf("SDK: %s", ESP.getSdkVersion());
+  M5.Display.setCursor(0, LAYOUT_LINE_HEIGHT * 3);
+  M5.Display.printf("MAC: %s", WiFi.macAddress().c_str());
   M5.Display.endWrite();
 
   preferences.begin(DEVICE_NAME.c_str(), false);
@@ -426,14 +427,15 @@ void loop() {
   } else {
     drawPreferencesScreen();
   }
+  M5.Display.endWrite();
 
   unsigned long now = millis();
   unsigned long elapsed = now - start;
 
+  M5.Display.startWrite();
   if (currentScreenMode == SCREEN_MAIN) {
     M5.Display.setTextSize(1);
     M5.Display.setCursor(0, 200);
-    M5.Display.printf("SDK: %s | ", ESP.getSdkVersion());
     M5.Display.printf("Loop: %3d ms | ", elapsed);
     M5.Display.printf("Bat: %3d %%", M5.Power.getBatteryLevel());
     M5.Display.setTextSize(2);
