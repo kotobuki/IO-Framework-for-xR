@@ -1331,5 +1331,5 @@ void drawButton(int centerX, const String &title) {
 
   M5.Display.fillRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_BLACK);
   M5.Display.drawRect(rectLeft, rectTop, rectWidth, rectHeight, TFT_GREEN);
-  M5.Display.drawCentreString(title, centerX, coordinateY, 1);
+  M5.Display.drawCenterString(title, centerX, coordinateY);
 }
