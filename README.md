@@ -48,10 +48,6 @@ With this framework, you may be able to expand your imagination of the concept o
 - Windows - Chrome
 - macOS - Chrome
 
-#### Known issues
-
-- [ ] Bluetooth keyboard input doesn't work with the STYLY app v9.0.4 on iOS.
-
 ### Supported combinations (maximum)
 
 The connected Unit(s) input is transmitted on three different channels: analog, joystick, and buttons. The analog and joystick channels can handle up to one sensor Unit input for each at once, and the buttons channel can handle up to six button inputs simultaneously.
