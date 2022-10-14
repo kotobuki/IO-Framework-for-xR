@@ -153,22 +153,22 @@ The SDK consists of components as follows.
 - `IOFrameworkGestureHandler` is a handler for events from a Gesture sensor (in both joystick and buttons channel)
 - `IOFrameworkOutputHandler` is a handler for events in the output channel via Wi-Fi
 
-![IOFrameworkTestUI](images/IOFrameworkTestUI.png)
+![IOFrameworkTestUI](images/IOFrameworkTestUI.png)  
 IOFrameworkTestUI
 
-![IOFrameworkAnalogHandler](images/IOFrameworkAnalogHandler.png)
+![IOFrameworkAnalogHandler](images/IOFrameworkAnalogHandler.png)  
 IOFrameworkAnalogHandler
 
-![IOFrameworkJoystickHandler](images/IOFrameworkJoystickHandler.png)
+![IOFrameworkJoystickHandler](images/IOFrameworkJoystickHandler.png)  
 IOFrameworkJoystickHandler
 
-![IOFrameworkButtonsHandler](images/IOFrameworkButtonsHandler.png)
+![IOFrameworkButtonsHandler](images/IOFrameworkButtonsHandler.png)  
 IOFrameworkButtonsHandler
 
-![IOFrameworkGestureHandler](images/IOFrameworkGestureHandler.png)
+![IOFrameworkGestureHandler](images/IOFrameworkGestureHandler.png)  
 IOFrameworkGestureHandler
 
-![IOFrameworkOutputHandler](images/IOFrameworkOutputHandler.png)
+![IOFrameworkOutputHandler](images/IOFrameworkOutputHandler.png)  
 IOFrameworkOutputHandler
 
 ### Dependencies
@@ -184,6 +184,9 @@ IOFrameworkOutputHandler
 4. Instantiate a handler from handlers in the SDK (e.g., `IOFrameworkAnalogHandler`) as a Child of the `IOFrameworkManager` object
 5. Unpack the handler
 6. Navigate PlayMaker editor to the FSM of the handler and edit for your scene
+
+![How to layout SDK components in Unity](images/how-to-layout-sdk-components-in-unity.png)  
+How to layout the SDK components in Unity
 
 ### Input
 
@@ -235,7 +238,8 @@ sequenceDiagram
     M-->>S: keyboard events over BLE
 ```
 
-![keyboard-layout](images/keyboard-layout.png)
+![keyboard-layout](images/keyboard-layout.png)  
+The keys used for the protocol
 
 - Keys in green: used in STYLY Web Player
 - Keys in yellow: used for the Analog channel
