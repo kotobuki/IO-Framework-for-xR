@@ -335,6 +335,9 @@ Example:
 
 `GET` `http://192.168.0.10/output?val=123`
 
+![Control output without SDK: step 1](images/control-output-without-sdk.png)
+An example of controlling output without SDK in PlayMaker: build an URL (this part can be parameterized) and issue an HTTP request (you need to add states to handle errors properly)
+
 ## For firmware developers
 
 ### Preparing the development environment
